@@ -24,6 +24,13 @@ module Resource
   def Resource.run
     # Initializations
     check_command
+    case ARGV[1]
+    when 'update'
+      Resource.update
+    end
+  end
+
+  def Resource.update
     @tmp=  Hash.new # table of resource id's
     @rcnt = 0
     header = File.open(RESOURCE_HEADER, 'w')
