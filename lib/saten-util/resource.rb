@@ -7,21 +7,24 @@ module Resource
   # @img_dir | String
   # @bgm_dir | String
   # @sfx_dir | String
+  # @prefix | String
+  # @macro
 
   @commands = ['update']
 
   RESOURCE_HEADER = "include/saturn_engine/config/build/resource.h"
   RESOURCE_TABLE  = "data/mrb/saturn_engine/config/resource_table.txt"
 
-  PREFIX    = SaturnEngineUtilities.conf[:res_macro] 
-  MACRO     = "#define #{PREFIX}(x) saten_resource_fetch(x)"
+  @prefix    = SaturnEngineUtilities.conf[:res_macro] 
 
-  MACRO_IMG = "#define #{PREFIX}SPR(x) saten_resource_img(x)"
-  MACRO_SFX = "#define #{PREFIX}SFX(x) saten_resource_sfx(x)"
-  MACRO_BGM = "#define #{PREFIX}BGM(x) saten_resource_bgm(x)"
-  MACRO_TEX = "#define #{PREFIX}TEX(x) saten_resource_text(x)"
+  #MACRO_IMG = "#define #{PREFIX}SPR(x) saten_resource_img(x)"
+  #MACRO_SFX = "#define #{PREFIX}SFX(x) saten_resource_sfx(x)"
+  #MACRO_BGM = "#define #{PREFIX}BGM(x) saten_resource_bgm(x)"
+  #MACRO_TEX = "#define #{PREFIX}TEX(x) saten_resource_text(x)"
 
   def Resource.run
+    @prefix = SaturnEngineUtilities.conf[:res_macro]
+    @macro = "#define #{@prefix}(x) saten_resource_fetch(x)"
     # Initializations
     check_command
     case ARGV[1]
@@ -37,7 +40,7 @@ module Resource
     table  = File.open(RESOURCE_TABLE, 'w')
     header.puts "#ifndef SATURN_ENGINE_CONFIG_BUILD_RESOURCE"
     header.puts "#define SATURN_ENGINE_CONFIG_BUILD_RESOURCE"
-    header.puts MACRO
+    header.puts @macro
 
     # Scan each resource load file
     Dir.foreach(SaturnEngineUtilities.conf[:res_dir]) do |x| 

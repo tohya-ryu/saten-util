@@ -12,9 +12,9 @@ Gem::Specification.new do |s|
              "lib/saten-util/scene.rb",
              "lib/saten-util/resource.rb",
              "lib/saten-util/build.rb",
-             "data/scene.h",
-             "data/scene.c",
-             "data/helper.c"]
+             "data/template/scene.h",
+             "data/template/scene.c",
+             "data/template/helper.c"]
   s.homepage = 'https://github.com/tohya-ryu/saten-util'
   s.license = 'MIT'
 end

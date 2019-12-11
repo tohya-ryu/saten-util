@@ -1,7 +1,7 @@
 #ifndef SCENE_{{up}}
 #define SCENE_{{up}} {{id}}
 
-typdef struct _scene_{{low}}_data {
+typedef struct _scene_{{low}}_data {
 } scene_{{low}}_data;
 
 
