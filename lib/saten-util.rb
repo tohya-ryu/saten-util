@@ -1,5 +1,8 @@
 module SaturnEngineUtilities
-  def run
-    p "saten-util runs"
+  class Main
+    def run(args)
+      p __dir__
+      p Dir.pwd
+    end
   end
 end
