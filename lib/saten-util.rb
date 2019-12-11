@@ -1,21 +1,29 @@
 require 'yaml'
+
+class String
+  def begins_with?(x)
+    test = self.lstrip
+    test[0] == x
+  end
+end
+
 module SaturnEngineUtilities
     
     @config = Hash.new
-    @commands = ['scene', 'resource', 'build' ]
+    @commands = ['scene', 's', 'resource', 'r', 'build', 'b']
 
     CONF_FILENAME = 'saten-util-conf.yaml'
 
     def SaturnEngineUtilities.main
       # Initializations
-      check_command
       load_config
+      check_command
       case ARGV[0]
-      when 'scene'
+      when 'scene', 's'
         Scene.run
-      when 'resource'
+      when 'resource', 'r'
         Resource.run
-      when 'build'
+      when 'build', 'b'
         Build.run
       end
     end
@@ -25,12 +33,17 @@ module SaturnEngineUtilities
       exit
     end
 
+    def SaturnEngineUtilities.conf
+      @config
+    end
+
     def SaturnEngineUtilities.check_command
       if ARGV.empty? || !(@commands.include?(ARGV[0]))
-        puts "  Missing or invalid command. Legal commands:"
+        puts "Missing or invalid command. Legal commands:"
         @commands.each do |c|
           p c
         end
+        quit
       end
     end
 
@@ -45,7 +58,7 @@ module SaturnEngineUtilities
           quit
         end
       else
-        puts "  File '#{CONF_FILENAME}' not found. Please run this program"\
+        puts "File '#{CONF_FILENAME}' not found. Please run this program"\
           " from a Saturn Engine project directory and make sure the"\
           " file exists inside of it."
         quit
