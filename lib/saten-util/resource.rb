@@ -9,13 +9,14 @@ module Resource
   # @sfx_dir | String
   # @prefix | String
   # @macro
+  # @config
 
   @commands = ['update']
 
   RESOURCE_HEADER = "include/saturn_engine/config/build/resource.h"
   RESOURCE_TABLE  = "data/mrb/saturn_engine/config/resource_table.txt"
 
-  @prefix    = SaturnEngineUtilities.conf[:res_macro] 
+  RESOURCE_CONF_FILENAME = 'saten-util-conf.yaml'
 
   #MACRO_IMG = "#define #{PREFIX}SPR(x) saten_resource_img(x)"
   #MACRO_SFX = "#define #{PREFIX}SFX(x) saten_resource_sfx(x)"
@@ -23,10 +24,11 @@ module Resource
   #MACRO_TEX = "#define #{PREFIX}TEX(x) saten_resource_text(x)"
 
   def Resource.run
-    @prefix = SaturnEngineUtilities.conf[:res_macro]
+    @config = SaturnEngineUtilities.load_config(RESOURCE_CONF_FILENAME)
+    @prefix = @config[:res_macro]
     @macro = "#define #{@prefix}(x) saten_resource_fetch(x)"
     # Initializations
-    check_command
+    SaturnEngineUtilities.check_command(@commands, ARGV[1])
     case ARGV[1]
     when 'update'
       Resource.update
@@ -43,12 +45,12 @@ module Resource
     header.puts @macro
 
     # Scan each resource load file
-    Dir.foreach(SaturnEngineUtilities.conf[:res_dir]) do |x| 
+    Dir.foreach(@config[:res_dir]) do |x| 
       @text_dir = nil
       @img_dir  = nil
       @bgm_dir  = nil
       @sfx_dir  = nil
-      path = SaturnEngineUtilities.conf[:res_dir] + x
+      path = @config[:res_dir] + x
       next if File.directory?(path)
       next unless File.fnmatch('*.rb', x)
       puts "Scanning #{path}"
@@ -129,16 +131,6 @@ module Resource
     puts "Wrote to '#{RESOURCE_HEADER}.'"
     puts "finished running saten-util resource update"
  
-  end
-
-  def Resource.check_command
-    if ARGV[1].nil? || !(@commands.include?(ARGV[1]))
-      puts "Missing or invalid command for resource handler. Legal commands:"
-      @commands.each do |c|
-        p c
-      end
-      SaturnEngineUtilities.quit
-    end
   end
 
   def Resource.table_write (table, path)

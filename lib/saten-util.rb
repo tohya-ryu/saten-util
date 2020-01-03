@@ -9,15 +9,11 @@ end
 
 module SaturnEngineUtilities
     
-    @config = Hash.new
-    @commands = ['scene', 's', 'resource', 'r', 'build', 'b']
-
-    CONF_FILENAME = 'saten-util-conf.yaml'
+    COMMANDS = ['scene', 's', 'resource', 'r', 'build', 'b']
 
     def SaturnEngineUtilities.main
       # Initializations
-      load_config
-      check_command
+      check_command(COMMANDS, ARGV[0])
       case ARGV[0]
       when 'scene', 's'
         Scene.run
@@ -33,36 +29,35 @@ module SaturnEngineUtilities
       exit
     end
 
-    def SaturnEngineUtilities.conf
-      @config
-    end
-
-    def SaturnEngineUtilities.check_command
-      if ARGV.empty? || !(@commands.include?(ARGV[0]))
+    def SaturnEngineUtilities.check_command(list, cmd)
+      if cmd.nil? || !(list.include?(cmd))
         puts "Missing or invalid command. Legal commands:"
-        @commands.each do |c|
+        list.each do |c|
           p c
         end
         quit
       end
     end
 
-    def SaturnEngineUtilities.load_config
-      if File.exists?(CONF_FILENAME)
+    def SaturnEngineUtilities.load_config(fn)
+      yaml = Hash.new
+      if File.exists?(fn)
         begin
-          file = File.open(CONF_FILENAME, 'r')
-          @config =  YAML.load(file)
+          file = File.open(fn, 'r')
+          #@config =  YAML.load_stream(file)
+          yaml =  YAML.load(file)
           file.close
         rescue StandardError
           puts "Failed to load config file."
           quit
         end
       else
-        puts "File '#{CONF_FILENAME}' not found. Please run this program"\
+        puts "File '#{fn}' not found. Please run this program"\
           " from a Saturn Engine project directory and make sure the"\
           " file exists inside of it."
         quit
       end
+      yaml
     end
 
   # Load utilities
