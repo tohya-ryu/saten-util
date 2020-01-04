@@ -20,7 +20,7 @@ module SaturnEngineUtilities
       when 'resource', 'r'
         Resource.run
       when 'build', 'b'
-        Build.run
+        Builder.run
       end
     end
 
