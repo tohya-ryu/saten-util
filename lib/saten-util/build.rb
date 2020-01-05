@@ -12,20 +12,26 @@ module Builder
 
   def Builder.run
     @config = SaturnEngineUtilities.load_config(BUILD_CONF_FILENAME)
-    @targets = @config[:platform].clone
-    @targets.push 'all'
-    @targets.push 'clean'
-    SaturnEngineUtilities.check_command(@targets, ARGV[1])
-    @target = ARGV[1]
-    case @target
-    when 'all'
+    targets = @config[:platform].clone
+    controllers = @config[:control].clone
+    targets.push('all')
+    targets.push('clean')
+    @config[:control].each do |c|
+      targets.push(c)
+    end
+    ARGV[1..-1].each do |arg|
+      SaturnEngineUtilities.check_command(targets, arg)
+      case arg
+      when 'all'
       @config[:platform].each do |p|
         Builder.build(p)
       end
-    when 'clean'
-    when 'install'
-    else
-      Builder.build(@target)
+      when 'clean'
+      when 'install'
+      else
+        Builder.build(arg) if @config[:platform].include?(arg)
+        #Builder.control(arg) if controllers.include?(arg)
+      end
     end
   end
 
