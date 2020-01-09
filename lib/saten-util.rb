@@ -60,6 +60,16 @@ module SaturnEngineUtilities
       yaml
     end
 
+    def SaturnEngineUtilities.is_file_of_type?(str, str2)
+      case str
+      when '.', '..'
+        return false
+      else
+        return false if str[-2..-1] != str2
+      end
+      true
+    end
+
   # Load utilities
   require 'saten-util/scene.rb'
   require 'saten-util/resource.rb'
