@@ -57,6 +57,8 @@ module Builder
       @cflags = ""
       @src = Array.new
       @config = conf
+      @cc = @config[:cc][platform]
+      p @cc
       @config[:include_dir]['all'].each do |idir|
         append_cflags('I', idir)
       end
@@ -73,6 +75,9 @@ module Builder
           SaturnEngineUtilities.quit
         end
         Dir.mkdir(File.join(dir,'obj')) unless Dir.exist?(File.join(dir,'obj'))
+        unless Dir.exist?(File.join(dir, 'obj', platform))
+          Dir.mkdir(File.join(dir, 'obj', platform))
+        end
         Dir.foreach(dir) do |item|
           path = File.join(dir,item)
           next unless SaturnEngineUtilities.is_file_of_type?(path, '.c')
