@@ -55,6 +55,7 @@ module Builder
     def initialize(platform,conf)
       # Setup cflags
       @cflags = ""
+      @src = Array.new
       @config = conf
       @config[:include_dir]['all'].each do |idir|
         append_cflags('I', idir)
@@ -65,19 +66,22 @@ module Builder
       append_sflags(platform)
       append_sflags(ARGV[2]) if ARGV[2]
       p @cflags
-      # get source files
+      # Get source files
       @config[:source_dir].each do |dir|
         unless Dir.exist?(dir)
           puts "Source directory '#{dir}' not found"
           SaturnEngineUtilities.quit
         end
+        Dir.mkdir(File.join(dir,'obj')) unless Dir.exist?(File.join(dir,'obj'))
         Dir.foreach(dir) do |item|
           path = File.join(dir,item)
           next unless SaturnEngineUtilities.is_file_of_type?(path, '.c')
-          p path
+          @src.push(path)
         end
       end
-      # build obj files if needed
+      # Build object files if necessary
+      @src.each do |src_path|
+      end
     end
 
     def append_cflags(flag,string)
