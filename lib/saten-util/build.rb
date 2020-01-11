@@ -50,6 +50,7 @@ module Builder
     # Instance Variables
     # @config
     # @cflags
+    # @cc
     # @src | Array of source file paths
 
     def initialize(platform,conf)
@@ -58,7 +59,6 @@ module Builder
       @src = Array.new
       @config = conf
       @cc = @config[:cc][platform]
-      p @cc
       @config[:include_dir]['all'].each do |idir|
         append_cflags('I', idir)
       end
@@ -81,12 +81,42 @@ module Builder
         Dir.foreach(dir) do |item|
           path = File.join(dir,item)
           next unless SaturnEngineUtilities.is_file_of_type?(path, '.c')
-          @src.push(path)
+          @src.push(path.split('/'))
         end
       end
       # Build object files if necessary
-      @src.each do |src_path|
+      @src.each do |src|
+        # Check for corresponding object file
+        obj = src.clone
+        obj = obj.insert(obj.size-1, 'obj')
+        obj = obj.insert(obj.size-1, platform).join('/')
+        obj[-1] = 'o'
+        src = src.join('/')
+        if File.exist?(obj)
+          objmtime = File.mtime(obj)
+          recipe = %x{#{@cc} -M #{src} #{@cflags}}
+          recipe.slice!(0..recipe.index(':'))
+          recipe.gsub!("\n", '')
+          recipe.gsub!("\\", '')
+          recipe.squeeze!(" ")
+          recipe = recipe[1..-1]
+          recipe = recipe.split(" ")
+          recipe.each do |dependency|
+            if File.mtime(dependency) > objmtime
+              compile(obj, src)
+              break
+            end
+          end
+        else
+          compile(obj, src)
+        end
+        # Compile obj file
       end
+    end
+
+    def compile(obj, src)
+      command = "#{@cc} -o #{obj} #{src} #{@cflags}"
+      %x{#{command}}
     end
 
     def append_cflags(flag,string)
