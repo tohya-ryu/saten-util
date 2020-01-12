@@ -13,12 +13,9 @@ module Builder
   def Builder.run
     @config = SaturnEngineUtilities.load_config(BUILD_CONF_FILENAME)
     targets = @config[:platform].clone
-    controllers = @config[:control].clone
     targets.push('all')
     targets.push('clean')
-    @config[:control].each do |c|
-      targets.push(c)
-    end
+    targets.push('install')
     ARGV[1..-1].each do |arg|
       SaturnEngineUtilities.check_command(targets, arg)
       case arg
@@ -30,7 +27,6 @@ module Builder
       when 'install'
       else
         Builder.build(arg) if @config[:platform].include?(arg)
-        #Builder.control(arg) if controllers.include?(arg)
       end
     end
   end
@@ -55,14 +51,20 @@ module Builder
 
     def initialize(platform,conf)
       # Setup cflags
+      if platform.include?('-')
+        @clean_platform = platform.slice(0...(platform.index('-')))
+      else
+        @clean_platform = platform
+      end
+      @platform = platform
       @cflags = ""
       @src = Array.new
       @config = conf
-      @cc = @config[:cc][platform]
+      @cc = @config[:cc][@clean_platform]
       @config[:include_dir]['all'].each do |idir|
         append_cflags('I', idir)
       end
-      @config[:include_dir][platform].each do |idir|
+      @config[:include_dir][@clean_platform].each do |idir|
         append_cflags('I', idir)
       end
       append_sflags(platform)
@@ -128,9 +130,9 @@ module Builder
     end
 
     def append_sflags(string)
-      if @config[:sflag].include?(string)
-        @config[:sflag][string].each do |str|
-          append_cflags('D',str)
+      if @config[:cflag].include?(string)
+        @config[:cflag][string].each do |str|
+          append_cflags(str[0],str[1..-1])
         end
       end
     end
