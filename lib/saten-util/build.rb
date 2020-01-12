@@ -69,7 +69,6 @@ module Builder
       end
       append_sflags(platform)
       append_sflags(ARGV[2]) if ARGV[2]
-      p @cflags
       # Get source files
       @config[:source_dir].each do |dir|
         unless Dir.exist?(dir)
@@ -95,6 +94,7 @@ module Builder
         obj[-1] = 'o'
         src = src.join('/')
         if File.exist?(obj)
+          p "#{obj} exists, checking for update..."
           objmtime = File.mtime(obj)
           recipe = %x{#{@cc} -M #{src} #{@cflags}}
           recipe.slice!(0..recipe.index(':'))
@@ -105,11 +105,13 @@ module Builder
           recipe = recipe.split(" ")
           recipe.each do |dependency|
             if File.mtime(dependency) > objmtime
+              p "#{src} has been updated, recompiling obj file..."
               compile(obj, src)
               break
             end
           end
         else
+          p "#{obj} does not exist, compiling..."
           compile(obj, src)
         end
         # Compile obj file
@@ -117,7 +119,8 @@ module Builder
     end
 
     def compile(obj, src)
-      command = "#{@cc} -o #{obj} #{src} #{@cflags}"
+      command = "#{@cc} -c #{src} -o #{obj} #{@cflags}"
+      p command
       %x{#{command}}
     end
 
