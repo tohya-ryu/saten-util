@@ -50,6 +50,7 @@ module Builder
     # @src | Array of source file paths
 
     def initialize(platform,conf)
+      @name = conf[:name] + "-#{platform}"
       # Setup cflags
       if platform.include?('-')
         @clean_platform = platform.slice(0...(platform.index('-')))
@@ -59,6 +60,7 @@ module Builder
       @platform = platform
       @cflags = ""
       @src = Array.new
+      @obj = Array.new
       @config = conf
       @cc = @config[:cc][@clean_platform]
       @config[:include_dir]['all'].each do |idir|
@@ -92,6 +94,7 @@ module Builder
         obj = obj.insert(obj.size-1, 'obj')
         obj = obj.insert(obj.size-1, platform).join('/')
         obj[-1] = 'o'
+        @obj.push(obj)
         src = src.join('/')
         if File.exist?(obj)
           p "#{obj} exists, checking for update..."
@@ -116,10 +119,29 @@ module Builder
         end
         # Compile obj file
       end
+      # Link object files
+      link
     end
 
     def compile(obj, src)
       command = "#{@cc} -c #{src} -o #{obj} #{@cflags}"
+      p command
+      %x{#{command}}
+    end
+
+    def link
+      command = "#{@cc} -o bin/#{@name}"
+      @obj.each do |o|
+        command << " #{o}"
+      end
+      @config[:lib]['all'].each do |l|
+        l.prepend('-') if l[0] == 'l' || l[0] == 'L'
+        command << " #{l}"
+      end
+      @config[:lib][@clean_platform].each do |l|
+        l.prepend('-') if l[0] == 'l' || l[0] == 'L'
+        command << " #{l}"
+      end
       p command
       %x{#{command}}
     end
