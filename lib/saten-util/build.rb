@@ -120,7 +120,7 @@ module Builder
         # Compile obj file
       end
       # Link object files
-      link
+      link(@clean_platform)
     end
 
     def compile(obj, src)
@@ -129,8 +129,11 @@ module Builder
       %x{#{command}}
     end
 
-    def link
+    def link(plat)
       command = "#{@cc} -o bin/#{@name}"
+      if (plat == "win32" || plat == "win64")
+        command << ".exe"
+      end
       @obj.each do |o|
         command << " #{o}"
       end
